@@ -1,3 +1,4 @@
+#-*- coding: utf-8 -*-
 import requests
 # 用于解析html数据的框架
 from bs4 import BeautifulSoup
@@ -5,39 +6,7 @@ from bs4 import BeautifulSoup
 from xlwt import *
 import json
 import re
-import  time
-
-# 创建一个工作
-book = Workbook(encoding='utf-8');
-# 向表格中增加一个sheet表，sheet1为表格名称 允许单元格覆盖
-sheet = book.add_sheet('sheet1', cell_overwrite_ok=True)
-
-# 设置样式
-style = XFStyle();
-pattern = Pattern();
-pattern.pattern = Pattern.SOLID_PATTERN;
-pattern.pattern_fore_colour="0x00";
-style.pattern = pattern;
-# 设置列标题
-sheet.write(0, 0, "标题")
-sheet.write(0, 1, "地区")
-sheet.write(0, 2, "区方向")
-sheet.write(0, 3, "小区名")
-sheet.write(0, 4, "平米")
-sheet.write(0, 5, "卧室方向")
-sheet.write(0, 6, "几厅几卧")
-sheet.write(0, 7, "元/月")
-
-# 设置列宽度
-sheet.col(0).width = 0x0d00 + 200*50
-sheet.col(1).width = 0x0d00 + 20*50
-sheet.col(2).width = 0x0d00 + 10*50
-sheet.col(3).width = 0x0d00 + 120*50
-sheet.col(4).width = 0x0d00 + 1*50
-sheet.col(5).width = 0x0d00 + 50*50
-
-# 指定爬虫所需的上海各个区域名称
-citys = ['xinchengqu', 'beilin', 'yanta','baqiao']
+import time
 
 def getHtml(city):
     try:
@@ -80,7 +49,7 @@ def saveData(city, url, pageIndex):
     html = requests.get(urlStr, headers=headers).content;
     soup = BeautifulSoup(html, 'lxml')
     liList = soup.findAll("div", {"class": "content__list--item"})
-    index=0;
+
     for info in liList:
         title =info.find("p",class_="content__list--item--title twoline").find("a").text;
         address =info.find("p",class_="content__list--item--des").find("a").text;
@@ -94,21 +63,7 @@ def saveData(city, url, pageIndex):
         timeonline =info.find("p",class_="content__list--item--time oneline").text;
         priceall =info.find("span",class_="content__list--item-price").text;
         price = getreRes('\d+\.?\d*',priceall);
-        #print(address);
 
-        # flood = info.find("div", class_="flood").text
-        # subway = info.find("div", class_="tag").findAll("span", {"class", "subway"});
-        # subway_col="";
-        # if len(subway) > 0:
-        #     subway_col = subway[0].text;
-
-        #taxfree = info.find("div", class_="tag").findAll("span", {"class", "taxfree"});
-        taxfree_col="";
-        # if len(taxfree) > 0:
-        #     taxfree_col = taxfree[0].text;
-
-        #priceInfo =info.find("div",class_="priceInfo").find("div",class_="totalPrice").text;
-        # print(flood);
         global row
         sheet.write(row, 0, title)
         sheet.write(row, 1, address)
@@ -118,14 +73,45 @@ def saveData(city, url, pageIndex):
         sheet.write(row, 6,shitingwei)
         sheet.write(row, 7,price)
         row+=1;
-        index=row;
+
+# 创建一个工作
+book = Workbook(encoding='utf-8');
+# 向表格中增加一个sheet表，sheet1为表格名称 允许单元格覆盖
+sheet = book.add_sheet('sheet1', cell_overwrite_ok=True)
+
+# 设置样式
+style = XFStyle();
+pattern = Pattern();
+pattern.pattern = Pattern.SOLID_PATTERN;
+pattern.pattern_fore_colour="0x00";
+style.pattern = pattern;
+# 设置列标题
+sheet.write(0, 0, "标题")
+sheet.write(0, 1, "地区")
+sheet.write(0, 2, "区方向")
+sheet.write(0, 3, "小区名")
+sheet.write(0, 4, "平米")
+sheet.write(0, 5, "卧室方向")
+sheet.write(0, 6, "几厅几卧")
+sheet.write(0, 7, "元/月")
+
+# 设置列宽度
+sheet.col(0).width = 0x0d00 + 200*50
+sheet.col(1).width = 0x0d00 + 20*50
+sheet.col(2).width = 0x0d00 + 10*50
+sheet.col(3).width = 0x0d00 + 120*50
+sheet.col(4).width = 0x0d00 + 1*50
+sheet.col(5).width = 0x0d00 + 50*50
+
+# 指定爬虫所需的上海各个区域名称
+citys = ['xinchengqu', 'beilin', 'yanta','baqiao']
 
 # 判断当前运行的脚本是否是该脚本，如果是则执行
 # 如果有文件xxx继承该文件或导入该文件，那么运行xxx脚本的时候，这段代码将不会执行
-if __name__ == '__main__':
-    # getHtml('jinshan')
-    row=1
-    for i in citys:
-        getHtml(i)
-    # 最后执行完了保存表格，参数为要保存的路径和文件名，如果不写路径则默然当前路径
-    book.save('lianjia-shanghai.xls')
+#if __name__ == '__main__':
+# getHtml('jinshan')
+row=1
+for i in citys:
+    getHtml(i)
+# 最后执行完了保存表格，参数为要保存的路径和文件名，如果不写路径则默然当前路径
+book.save('lianjia-shanghai.xls')
